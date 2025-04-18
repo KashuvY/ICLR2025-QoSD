@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - hydra: preprocess
+  - dataset: QoSD
+  - paths: common
+
+run_name: default_run
+num_workers: 4

@@ -1,0 +1,13 @@
+defaults:
+  - _self_
+  - hydra: train
+  - dataset: QoSD
+  - trainer: QoSD
+  - model: QoSD
+  - paths: common
+
+run_name: default_run
+
+seed: 0
+cuda: 0
+num_workers: 2

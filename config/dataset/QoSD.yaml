@@ -1,0 +1,7 @@
+# kashuvy-temp/config/dataset/QoSD.yaml
+name:        QoSD
+full_name:   Quality of Service Degradation
+n_train:     80      # override at CLI for ablation
+n_test:      20
+n_nodes:     100
+generator:   erdos-renyi

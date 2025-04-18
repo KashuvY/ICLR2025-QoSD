@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+  - hydra: test
+  - dataset: QoSD
+  - model: QoSD
+
+run_name: default_run 
+
+seed: 0
+cuda: 0
+num_workers: 4
+
+gurobi:
+  max_time: 10
+  threads: 1

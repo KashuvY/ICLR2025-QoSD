@@ -1,0 +1,13 @@
+# kashuvy-temp/config/paths/common.yaml
+data_dir:            data/QoSD/
+train_data_dir:      ${data_dir}lp/
+test_data_dir:       ${data_dir}lp/
+
+# artefacts for this run → runs/<run_name>/…
+preprocess_dir:      runs/${run_name}/preprocess/
+data_samples_dir:    ${preprocess_dir}samples/
+data_tensors_dir:    ${preprocess_dir}tensors/
+
+model_save_dir:      runs/${run_name}/models/
+test_dir:            runs/${run_name}/results/
+tensorboard_dir:     runs/${run_name}/tensorboard/
