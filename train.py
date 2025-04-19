@@ -7,6 +7,7 @@ Train the DiffILO GNN on a QoSD run.
 """
 
 import argparse, os, subprocess, random, json, logging, torch
+import pandas as pd
 from torch_geometric.loader import DataLoader
 from src.model import GraphDataset, GNNPredictor
 from src.utils  import set_seed, gumbel_sample
@@ -104,13 +105,62 @@ def main():
     p.add_argument("--batch_size", type=int, default=1)
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--cuda",    type=int, default=0)
+    p.add_argument(
+        "--data_dir",
+        type=str,
+        default=None,
+        help="If set, load graph.txt + pairs.txt from this folder (skips generate_dataset)"
+    )
     args = p.parse_args()
 
     set_seed(0)
     device = torch.device(f"cuda:{args.cuda}" if torch.cuda.is_available() else "cpu")
     os.makedirs(f"runs/{args.run}", exist_ok=True)
 
-    ensure_raw_dataset(args.run,args.n_train,args.n_test,args.n_nodes,args.generator,args.p_edge,args.n_pairs,args.threshold,args.max_budget)
+    if args.data_dir:
+        # ————————————————
+        # write your graph.txt + pairs.txt → raw JSON
+        raw_dir = f"runs/{args.run}/raw/data/raw"
+        os.makedirs(raw_dir, exist_ok=True)
+
+        # load edges
+        df = pd.read_csv(os.path.join(args.data_dir, "graph.txt"))
+        df = df[["u", "v", "weight", "max_budget"]]
+        edges = []
+        for _, row in df.iterrows():
+            edges.append({
+                "src": int(row.u),
+                "dest": int(row.v),
+                "initial_weight": float(row.weight),
+                "budget": int(row.max_budget)
+            })
+
+        # load pairs
+        pairs = []
+        with open(os.path.join(args.data_dir, "pairs.txt")) as f:
+            for line in f:
+                line = line.strip()
+                if not line: continue
+                s, t = map(int, line.split())
+                pairs.append({"src": s, "dest": t})
+
+        inst = {
+            "graph_id": 0,
+            "n_nodes": int(df[["u","v"]].max().max()) + 1,
+            "edges": edges,
+            "pairs": pairs,
+            "threshold": args.threshold
+        }
+        with open(os.path.join(raw_dir, "instance_0.json"), "w") as f:
+            json.dump(inst, f)
+    else:
+        ensure_raw_dataset(
+            args.run,
+            args.n_train, args.n_test,
+            args.n_nodes, args.generator, args.p_edge,
+            args.n_pairs, args.threshold, args.max_budget
+        )
+
     ensure_converted   (args.run)
     ensure_preprocessed(args.run,args.workers)
     split = make_split (args.run, args.n_train)
